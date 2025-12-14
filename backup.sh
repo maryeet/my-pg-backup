@@ -33,9 +33,9 @@ BACKUP_FILE_PATH="${BACKUP_DIR}/${BACKUP_FILENAME}"
 ENCRYPTION_PASSWORD=${ENCRYPTION_PASSWORD}
 
 # --- Rsync 远程上传配置 ---
-RSYNC_ENABLED=${RSYNC_ENABLED:-"true"}
+RSYNC_ENABLED=${RSYNC_ENABLED:-"false"}
 # 上传协议: "ssh" (默认) 或 "rsync" (daemon 模式)
-RSYNC_PROTOCOL=${RSYNC_PROTOCOL:-"ssh"}
+RSYNC_PROTOCOL=${RSYNC_PROTOCOL:-"rsync"}
 RSYNC_HOST=${RSYNC_HOST}
 RSYNC_USER=${RSYNC_USER}
 # 对于 ssh 模式, 这是远程的完整路径, e.g., /data/backups
@@ -115,7 +115,13 @@ upload_to_rsync() {
     fi
 
     log "--- [Step 2/3] Starting Rsync Upload (Protocol: ${RSYNC_PROTOCOL}) ---"
-
+    # -a: 归档模式, 但我们通过 --no-* 选项覆盖部分行为
+    # -v: 详细输出
+    # -z: 压缩传输
+    # --no-g: 不保留属组 (解决 chgrp 失败的问题)
+    # --no-p: 不保留权限
+    # --no-o: 不保留所有者 (好习惯)
+    RSYNC_FLAGS="-avz --no-g --no-p --no-o"
     if [ "${RSYNC_PROTOCOL}" = "ssh" ]; then
         # SSH 模式
         if [ -z "$RSYNC_HOST" ] || [ -z "$RSYNC_USER" ] || [ -z "$RSYNC_REMOTE_PATH" ]; then
@@ -128,7 +134,7 @@ upload_to_rsync() {
 
         RSYNC_TARGET="${RSYNC_USER}@${RSYNC_HOST}:${RSYNC_REMOTE_PATH}"
         log "Uploading via SSH to ${RSYNC_TARGET}..."
-        rsync -avz \
+        rsync ${RSYNC_FLAGS} \
           -e "ssh -p ${RSYNC_PORT_SSH} -i ${SSH_PRIVATE_KEY_PATH} -o StrictHostKeyChecking=no -o ConnectTimeout=30" \
           "${BACKUP_FILE_PATH}" \
           "${RSYNC_TARGET}"
@@ -145,7 +151,7 @@ upload_to_rsync() {
         export RSYNC_PASSWORD
         RSYNC_TARGET="rsync://${RSYNC_USER}@${RSYNC_HOST}:${RSYNC_PORT_DAEMON}/${RSYNC_REMOTE_PATH}"
         log "Uploading via rsync daemon to ${RSYNC_TARGET}..."
-        rsync -avz \
+        rsync ${RSYNC_FLAGS} \
           "${BACKUP_FILE_PATH}" \
           "${RSYNC_TARGET}/"
     else
