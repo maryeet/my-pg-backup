@@ -8,7 +8,7 @@ LABEL description="A Docker container to perform scheduled backups of a PostgreS
 # 安装依赖: postgresql-client 提供了 pg_dumpall, pg_isready 等工具
 # tzdata 用于设置时区，确保 cron 的执行时间符合预期
 RUN apk update --no-cache && apk add --no-cache postgresql-client tzdata rsync openssh-client p7zip bash curl
-
+ENV TZ=Asia/Shanghai
 # 将备份脚本复制到镜像中
 COPY backup.sh /usr/local/bin/backup.sh
 
