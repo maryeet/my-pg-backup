@@ -25,7 +25,7 @@ PGPORT=${PGPORT:-"5432"}
 PGUSER=${PGUSER:-"postgres"}
 PGPASSWORD=${PGPASSWORD} # 必须通过环境变量设置
 BACKUP_DIR="/backups"
-BACKUP_FILENAME="pg_backup_$(date +%Y%m%d_%H%M%S).sql.7z"
+BACKUP_FILENAME="pg_backup_$(date +%Y%m%d_%H%M%S).7z"
 BACKUP_FILE_PATH="${BACKUP_DIR}/${BACKUP_FILENAME}"
 
 # --- 7z 加密配置 ---
