@@ -167,7 +167,7 @@ cleanup_local_backups() {
     KEEP_DAYS=${KEEP_DAYS:-7}
     log "--- [Step 3/3] Cleaning up old local backups, keeping last ${KEEP_DAYS} days... ---"
 
-    if ! find "${BACKUP_DIR}" -name "pg_backup_*.sql.7z" -mtime +${KEEP_DAYS} -print -exec rm -f {} \; ; then
+    if ! find "${BACKUP_DIR}" -name "pg_backup_*.7z" -mtime +${KEEP_DAYS} -print -exec rm -f {} \; ; then
         log "Warning: Cleanup command encountered an issue, but the backup process is still considered successful."
     fi
     log "--- [Step 3/3] Cleanup Finished ---"
